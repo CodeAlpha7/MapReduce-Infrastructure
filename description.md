@@ -1,9 +1,5 @@
-### Big picture
-  - In this project, you are going to implement a simplied version of Map Reduce infrastructure. Please read [MapReduce](https://static.googleusercontent.com/media/research.google.com/en//archive/mapreduce-osdi04.pdf) paper, before you start.
-  - This is going to be a long project, **Start late at your own risk** 
-  - Short [**video**](https://youtu.be/bwBrduQ1RUE) browsing through the project structure.
+This project implements a simplified version of MapReduce influenced by the original [MapReduce](https://static.googleusercontent.com/media/research.google.com/en//archive/mapreduce-osdi04.pdf) paper.
 
-![Meme](https://memecrunch.com/meme/1HMYR/should-have-started-earlier/image.jpg?w=500&c=1)
 
 ### About MapReduce
 
@@ -14,8 +10,8 @@ MapReduce is a programming model and an associated implementation for processing
 
 ### What's simplified here (comparing from the original paper)
 1. **`The MapReduce library in the user program first splits the input files into M pieces of typically 16 megabytes to 64 megabytes (MB) per piece (controllable by the user via an optional parameter). It then starts up many copies of the program on a cluster of machines.`**
- - Instead of writing new split files, you will just store the offsets from the original file as the file shards.
- - **Sharding**: The configuration file contains a variable `map_kilobytes` which specifies the approximate shard size, and will be used to calculate the number of shards `M`. For example, if `map_kilobytes` in the config file is 16 and you are given 3 input files of sizes 20KB, 15KB, 20KB then your **calculated** number of shards `M` should be `ceil(55/16) = 4KB`.
+ - Instead of writing new split files, we just store the offsets from the original file as the file shards.
+ - **Sharding**: The configuration file contains a variable `map_kilobytes` which specifies the approximate shard size, and will be used to calculate the number of shards `M`. For example, if `map_kilobytes` in the config file is 16 and we are given 3 input files of sizes 20KB, 15KB, 20KB then our **calculated** number of shards `M` should be `ceil(55/16) = 4KB`.
 
     - So in the example above, we will use 4 mappers. The first 3 of these mappers will process approximately 16 KB of data each, and the last mapper will process all remaining data. So, in general the first M-1 mappers would process approximately `map_kilobytes`, and the last mapper would process the remaining.
     - Note that each mapper processes an approximate amount of data because we need to split input to the closest next line (i.e. `\n`) for the first M-1 mappers. This is because lines consist of different strings of words and thus cannot have a homogeneous length. Then, in the above example the shards will approximately look like:
@@ -24,9 +20,9 @@ MapReduce is a programming model and an associated implementation for processing
          - shard 3 - ((file: file2, offsets: 12-15kb), (file: file3, offsets: 0-13kb))
          - shard 4 - ((file: file3, offsets: 13-20kb))
 
-    - Further, you want your input shards to have complete record entries, for example, when your framework is running a word count program, then you should not be splitting in the middle of a word. For this reason and to make it simple, you should align your shard on '\n', i.e. new line which is roughly closest to the shard's end offset, calculated by above logic. You are free to choose to bring your end offset to the previous '\n' or the next '\n'.
-  - Instead of the map reduce library starting worker processes, you will be manually starting them up before running the main binary.
-  - Instead of running worker programs on different machines, you will start your development on a single machine by starting multiple instances of your worker program as processes on the same machine listening to different ports. 
+    - Further, we want your input shards to have complete record entries, for example, when our framework is running a word count program, then you should not be splitting in the middle of a word. For this reason and to make it simple, you should align your shard on '\n', i.e. new line which is roughly closest to the shard's end offset, calculated by above logic. We are free to choose to bring our end offset to the previous '\n' or the next '\n'.
+  - Instead of the map reduce library starting worker processes, we will be manually starting them up before running the main binary.
+  - Instead of running worker programs on different machines, we will start our development on a single machine by starting multiple instances of our worker program as processes on the same machine listening to different ports. 
 
 
 2. **`One of the copies of the program is special – the master. The rest are workers that are assigned work by the master. There are M map tasks and R reduce tasks to assign. The master picks idle workers and assigns each one a map task or a reduce task.`**
@@ -68,42 +64,16 @@ MapReduce is a programming model and an associated implementation for processing
  i.e., you must use a single space as a delimiter between the key and the value.**  
 
 7. **`When all map tasks and reduce tasks have been completed, the master wakes up the user program. At this point, the MapReduce call in the user program returns back to the user code.`**
- - This would be done the same way in your implementation. Waking up is simply the return from the function call.
+ - This would be done the same way in our implementation. Waking up is simply the return from the function call.
 
-### How You Are Going to Implement It
-- [Code walk through](structure.md)
-
-### Grading
-**Total Possible Score:** 12
-
-| Score | Reason |
-| ----- | ------ |
-| +4 | Query output is correct for inputs that are provided|
-| +4 | Query output is correct for inputs that are not provided |
-| +1 | Code compiles |
-| +1 | README |
-| +1 | Slower worker case is handled |
-| +1 | Worker failure case handled |
-
-
-### Deliverables
-
-Use the `collect_submission.py` script to generate a zip file to
-submit to Gradescope.
-
-It will ask for your first name and last name and generate a file
-called `Firstname_Lastname_p4.zip`.  If working in pairs, you may use
-either student name for the deliverable, and include the names of both
-members iin the README file.
-
-The resulting zip file should have the following contents:
+### Table of Contents:
 
   ```
-      README.md - Text file containing anything specific about the project that you want to tell the TAs.
+      README.md - Contains project description and changes made to simplify the MapReduce Architecture.
       src/
-      |- CMakeLists.txt           - It is already given to you working for the files mentioned below.
-      |- GenerateProtos.cmake        - It is already given to you working for the files mentioned below.
-      |                       You might need to change it if you add more source files.
+      |- CMakeLists.txt           
+      |- GenerateProtos.cmake       
+      |                       
       |- masterworker.proto - containing the grpc specification between master and worker.
       |- master.h           - containing the source code for master management.\
       |                       Note that you can add optional supporting files for master if you want.
@@ -121,4 +91,3 @@ The resulting zip file should have the following contents:
       |- Other unmodified files already present in the src
 
   ```
-4. Hand in your folder as a zip file through Gradescope.

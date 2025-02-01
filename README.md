@@ -1,8 +1,7 @@
-# CS 6210 Project4 - MapReduce Infrastructure
+A Simplified MapReduce Infrastructure
 
 ### How to setup the project  
 
-Setup grpc similar to project 3.
 Clone this repo
 
 In home directory, run the following commands:

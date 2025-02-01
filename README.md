@@ -1,4 +1,4 @@
-A Simplified MapReduce Infrastructure
+# A Simplified MapReduce Infrastructure
 
 ### How to setup the project  
 

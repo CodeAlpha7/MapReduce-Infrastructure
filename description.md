@@ -27,11 +27,11 @@ MapReduce is a programming model and an associated implementation for processing
 
 2. **`One of the copies of the program is special – the master. The rest are workers that are assigned work by the master. There are M map tasks and R reduce tasks to assign. The master picks idle workers and assigns each one a map task or a reduce task.`**
 - In a normal MapReduce setup, the master would run as a separate process. However, in this project the master is going to be part of the main function and will not run as an independent process. Instead, after you create the mapreduce object instance and call the run function, the master will be spawned automatically and start assigning tasks to the workers (i.e., this will be managed for you automatically in the provided code).
-  - Once you have M input shards created, your master is supposed to assign each shard to one of the available workers.
+  - Once we have M input shards created, our master is supposed to assign each shard to one of the available workers.
  - Your master can read the worker process addresses (ip:port) from the MapReduce specification structure provided by the framework.
  - Your master will essentially be maintaining a worker pool, taking care of various things such as tracking how many workers are there in the system, what is the state of each worker: `AVAILABLE, BUSY(doing map task/doing reduce task, etc.)`, when to assign what task to a worker, knowing when a worker is done.
  - `The communication of relevant instructions/data/results to/from the workers will be done through GRPC calls`. For example, the master can inform a mapper worker about the shard that it will be processing by passing the shard info in a grpc message. Who will be a client and who will be the server? What kind of message signature you will use? You will need to define your own proto files and master-worker (GRPC client-server) interfaces here.
-  - Your master is also given the number R, i.e., number of output files from the config. For simplicity, you can `start your reduce phase when ALL of the map tasks are done`.
+  - Our master is also given the number R, i.e., number of output files from the config. For simplicity, we can `start our reduce phase when ALL of the map tasks are done`.
  
  
 3. **`A worker who is assigned a map task reads the contents of the corresponding input split. It parses records out of the input data and passes each record to the user-defined Map function. The intermediate key/value pairs produced by the Map function are buffered in memory.`**
@@ -54,14 +54,14 @@ MapReduce is a programming model and an associated implementation for processing
   
 5. **`When a reduce worker is notified by the master about these locations, it uses remote procedure calls to read the buffered data from the local disks of the map workers. When a reduce worker has read all intermediate data, it sorts it by the intermediate keys so that all occurrences of the same key are grouped together. The sorting is needed because typically many different keys map to the same reduce task.`**
  - Theoretically, in real distributed environment, the intermediate files lie on local disks of mapper workers and reducers need to make remote file reads to get the data into their own local memory. However, for simplicity, you can have the intermediate files on the same file system as of your reducer worker, and hence you can read them through local file read system calls.
- - You have to take user's reducer logic (UserReducer's reduce()) in consideration, similar to how you handled user's mapper logic/algorithm.
- - You have one more constraint on the final output though. You have to make sure that the final output is sorted on its keys.
+ - We take user's reducer logic (UserReducer's reduce()) in consideration, similar to how you handled user's mapper logic/algorithm.
+ - We have one more constraint on the final output though. We make sure that the final output is sorted on its keys.
 
 6. **`The reduce worker iterates over the sorted intermediate data and for each unique intermediate key encountered, it passes the key and the corresponding set of intermediate values to the user’s Reduce function. The output of the Reduce function is appended to a final output file for this reduce partition.`**
- - This would be done the same way in your implementation. Make sure each reducer has its own file(create in the user given output directory) to which it appends its results.
+ - This would be done the same way in our implementation. We make sure each reducer has its own file (create in the user given output directory) to which it appends its results.
  **The output of the reducer must be of the format:
  key< space >value\n  
- i.e., you must use a single space as a delimiter between the key and the value.**  
+ i.e., we will use a single space as a delimiter between the key and the value.**  
 
 7. **`When all map tasks and reduce tasks have been completed, the master wakes up the user program. At this point, the MapReduce call in the user program returns back to the user code.`**
  - This would be done the same way in our implementation. Waking up is simply the return from the function call.
